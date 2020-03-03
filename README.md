@@ -13,7 +13,7 @@ It uses Express for creating a simple server, Nunjucks for templating, and the S
 4. In the `.env` file, set your secret key as STRIPE_API_KEY (`STRIPE_API_KEY="sk_test_************************"`)
 5. In the Javascript section of the `views/register.html` file, replace `var stripe = Stripe("pk_test_************************")` with your Stripe Publishable Key
 6. Run the app via `npm run start`
-7. Navigate to [localhost:3000](localhost:3000)
+7. Navigate to [localhost:3000](http://localhost:3000/)
 
 
 ## Demo Workflow

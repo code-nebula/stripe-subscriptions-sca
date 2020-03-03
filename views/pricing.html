@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="app-container-75">
+  {% for product in products %}
+  <div class="pricing-products">
+
+    <!-- PRODUCT HEADER -->
+    <div class="pricing-products-header">
+      <h3 class="header-uppercase header-white">{{ product.name }}</h3>
+      <p>{{ product.subheader }}</p>
+    </div>
+
+    <!-- PLAN -->
+    <div class="pricing-plans">
+      {% for plan in product.plans %}
+      
+        <!-- HIGHLIGHT PLAN -->
+        <div
+          {% if plan.highlight %}
+            class="card plan-highlight"
+          {% else %}
+            class="card"
+          {% endif %}
+          >
+          <form action="/register" method="POST">
+            <div class="card-body">
+
+              <!-- INPUTS: sent on form submission -->
+              <input type="hidden" value="{{ product.name }}" name="productName" />
+              <input type="hidden" value="{{ plan.formatted }}" name="plan" />
+
+              <!-- PLAN NAME + PRICING -->
+              <h4 class="header-uppercase header-blue">
+                {{ plan.nickname }}
+              </h4>
+              <h2 class="price">{{ plan.amount }} 
+                <span>
+                  / 
+                  {% if (plan.interval_count > 1) %} 
+                    {{ plan.interval_count }} {{ plan.interval }}s
+                
+                  {% else %}
+                    {{ plan.interval }}
+                  {% endif %}
+                </span>
+              </h2>
+
+              <!-- PLAN FEATURES -->
+              <div class="plan-features">
+                {% for feature in plan.features %}
+                <div class="plan-feature">
+                  <i class="fas fa-check-circle"></i>
+                  <span>{{ feature }}</span>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- FORM SUBMISSION -->
+            <button
+              class="card-btn"
+              type="submit">Upgrade Now</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

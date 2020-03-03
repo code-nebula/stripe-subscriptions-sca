@@ -1,0 +1,53 @@
+/* PRODUCTS */
+.pricing-products {
+  margin-bottom: 48px;
+}
+
+.pricing-products-header p {
+  margin: 8px 0 36px;
+  color: white;
+}
+
+/* PLANS */
+.pricing-plans {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.pricing-plans .card {
+  margin-left: -1px;
+}
+
+.pricing-plans .price {
+  margin: 8px 0 16px;
+}
+
+.pricing-plans .plan-feature {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.pricing-plans .plan-feature .fa-check-circle {
+  color: #6DDB17;
+  font-size: 20px;
+  transform: translateY(3px);
+  margin-right: 12px;
+}
+
+.pricing-plans .plan-feature span {
+  color: #757575;
+}
+
+/* Highlighted plan options/overrides */
+.pricing-plans .card.plan-highlight {
+  z-index: 10;
+}
+
+/* Normal plan options/overrides */
+.pricing-plans .card:not(.plan-highlight) .card-btn {
+  background-color: #F9DEC5 !important;
+  color: #EE7200 !important;
+}

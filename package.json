@@ -1,0 +1,26 @@
+{
+  "name": "stripe-subscriptions-2020",
+  "version": "1.0.0",
+  "description": "An updated tutorial on setting up recurring subscriptions with Stripe.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "stripe",
+    "recurring",
+    "billing",
+    "subscriptions",
+    "sca",
+    "payment-intents"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "nunjucks": "^3.2.0",
+    "stripe": "^8.15.0"
+  }
+}

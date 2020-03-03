@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="app-container-60 register">
+  <h3 class="header-uppercase header-white header-margin-bottom">
+    {{ productName }}
+  </h3>
+
+  <form id="payment-form">
+    <div class="card">
+      <div class="card-body">
+
+        <div class="card-title">
+          <h4 class="header-uppercase header-blue">
+            {{ plan.nickname }}
+          </h4>
+          <h2 class="price">{{ plan.amount }} 
+            <span>
+              / 
+              {% if (plan.interval_count > 1) %} 
+                {{ plan.interval_count }} {{ plan.interval }}s
+            
+              {% else %}
+                {{ plan.interval }}
+              {% endif %}
+            </span>
+          </h2>
+        </div>
+
+        <!-- INPUTS -->
+        <input id="plan" type="hidden" value="{{ plan.formatted }}" name="plan"/>
+        <input id="customerName"
+          name="name"
+          required="true"
+          placeholder="Name" />
+        <input id="customerEmail"
+          name="email"
+          type="email"
+          required="true"
+          placeholder="Email"/>
+    
+        <div id="card-element">
+          <!-- Stripe Elements will be mounted here -->
+        </div>
+    
+        <div id="card-errors" role="alert">
+          <!-- Any Stripe Elements error messages will be mounted here -->
+        </div>
+      </div>
+
+      <!-- FORM SUBMISSION -->
+      <button
+      class="card-btn"
+      type="submit">Pay Now</button>
+    </div>
+  </form>
+
+  <!-- LOADING STATE -->
+  <div id="loading" class="card card-centered hide">
+    <div class="card-body">
+      <div>
+        <div class="loader"></div>
+      </div>
+      
+      <h3 class="header-blue">Processing <br> your payment...</h3>
+      <p class="helper-text">Please wait a few minutes!</p>
+    </div>
+  </div>
+
+  <!-- SUCCESS STATE -->
+  <div id="success" class="card card-centered hide">
+    <div class="card-body">
+      <i class="success-icon fas fa-check-circle"></i>
+      <h3 class="header-blue">
+        Congrats, you’ve <br> successfully registered!
+      </h3>
+      <p class="helper-text">
+        Log in to the app to start creating your first survey!
+      </p>
+    </div>
+
+    <a href="/" class="card-btn">
+      Log In
+    </a>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div id="error" class="card card-centered hide">
+    <div class="card-body">
+      <i class="error-icon fas fa-exclamation-circle"></i>
+      <h3 class="header-red">
+        Sorry, it looks like <br> something went wrong
+      </h3>
+      <p class="helper-text">
+        Please contact us or try again.
+      </p>
+    </div>
+
+    <a href="/" class="card-btn">
+      Contact Us
+    </a>
+  </div>
+
+</div>
+
+<!-- JAVASCRIPT HERE -->
+<script>
+  /* Replace with Publishable Stripe Key */
+  var stripe = Stripe('pk_test_***********************');
+
+  /* INITIALIZE STRIPE ELEMENTS */
+
+  /* To use certain web fonts, load in source */
+  var elements = stripe.elements({
+    fonts: [
+      {
+        cssSrc: 'https://fonts.googleapis.com/css?family=Mukta:400,600,700&display=swap',
+      }
+    ],
+  });
+
+  /* Set up styles for your Stripe Elements instance --
+   * To make it match your site's design
+   */
+  var elementsStyles = {
+    base: {
+      color: "#004ABB",
+      iconColor: "#004ABB",
+      fontFamily: "'Mukta', Helvetica, sans-serif",
+      fontWeight: "600",
+      fontSmoothing: "antialiased",
+      fontSize: "16px",
+      "::placeholder": {
+        color: "#6099EE",
+        textTransform: "uppercase",
+      },
+    },
+    invalid: {
+      color: "#ff5252",
+      iconColor: "#ff5252",
+    },
+  };
+
+
+  /* HELPER FUNCTIONS */
+
+  /* Display error within "#card-errors" div */
+  function displayError(error) {
+    var cardError = document.getElementById('card-errors');
+    cardError.textContent = error ? error.message : '';
+  }
+
+  /* Show element specified by the "id" parameter
+   * Hide all other "states"
+   */
+  function showState(id) {
+    document.getElementById('payment-form').classList.add('hide');
+    document.getElementById('loading').classList.add('hide');
+    document.getElementById('success').classList.add('hide');
+    document.getElementById('error').classList.add('hide');
+
+    document.getElementById(id).classList.remove('hide');
+  }
+
+
+  /* MORE STRIPE ELEMENTS ACTIONS */
+
+  /* Create "card" instance of Stripe Elements and mount it to "#card-element" div */
+  var cardElement = elements.create("card", { style: elementsStyles });
+  cardElement.mount("#card-element");
+
+  /* Set up event listeners on card */
+  cardElement.addEventListener('change', ({error}) => {
+    displayError(error);
+  });
+
+
+  /* FORM SUBMISSION */
+  var form = document.getElementById('payment-form');
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault(); // Prevent the default form submission
+    const customerName = document.getElementById('customerName').value;
+    const customerEmail = document.getElementById('customerEmail').value;
+
+    /* Create your 'card' payment method */
+    stripe.createPaymentMethod({
+      type: 'card',
+      card: cardElement,
+      /* Reference: https://stripe.com/docs/api/payment_methods/create#create_payment_method-billing_details */
+      billing_details: {
+        name: customerName,
+        email: customerEmail,
+        // address
+        // phone
+      },
+    }).then((result) => {
+      if (result.error) {
+        displayError(result.error);
+        console.error('Error creating Stripe Payment Method: ', result.error);
+      } else {
+        /* Proceed to next step of creating customer and subscription */
+        stripePaymentMethodHandler(result.paymentMethod);
+      }
+    });
+  });
+
+
+  function stripePaymentMethodHandler(paymentMethod) {
+    showState('loading'); // Show loader
+
+    fetch('/handlePayment', {
+      method: 'post',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        email: document.getElementById('customerEmail').value,
+        name: document.getElementById('customerName').value,
+        plan: document.getElementById('plan').value,
+        paymentMethodId: paymentMethod.id,
+      }),
+    }).then((response) => {
+      /* Can only call response.json() once, otherwise you will get an error */
+      return response.json();
+    }).then((parsedResponse) => {
+      /* Proceed to next step of checking Payment Intent status */
+      manageSubscriptionStatus(parsedResponse.subscription);
+    }).catch((err) => {
+      console.error('Error creating subscription:', err);
+      showState('error'); // Show error state
+    });
+  }
+
+
+  function manageSubscriptionStatus(subscription) {
+    const { latest_invoice } = subscription;
+    const { payment_intent } = latest_invoice;
+
+    if (payment_intent) {
+      /* Do NOT share or embed your client_secret anywhere */
+      const { client_secret, status } = payment_intent;
+      if (status === "requires_action" || status === "requires_payment_method") {
+        stripe.confirmCardPayment(client_secret)
+        .then((result) => {
+          if (result.error) {
+            showState('payment-form');
+            displayError(result.error); // Display error message to customer
+          } else {
+            showState('success'); // Show success state
+          }
+        }).catch((err) => {
+          console.error('Error confirming card payment:', err);
+          showState('error'); // Show error state
+        });
+      } else {
+        showState('success'); // Show success state
+      }
+    } else {
+      /* If no payment intent exists, show the success state
+       * Usually in this case if you set up a trial with the subscription
+       */
+      showState('success');
+    }
+  }
+</script>
+
+{% endblock %}

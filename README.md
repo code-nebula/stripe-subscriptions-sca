@@ -1,6 +1,6 @@
 # stripe-subscriptions-sca
 
-This repository shows you how to use Node (version 8+) and Stripe to create recurring subscriptions with built-in SCA support. It is an updated version of [stripe-recurring-subscriptions] (https://github.com/code-nebula/stripe-recurring-subscriptions).
+This repository shows you how to use Node (version 8+) and Stripe to create recurring subscriptions with built-in SCA support. It is an updated version of [stripe-recurring-subscriptions](https://github.com/code-nebula/stripe-recurring-subscriptions).
 
 It uses Express for creating a simple server, Nunjucks for templating, and the Stripe API.
 

@@ -27,12 +27,15 @@ router.post('/handlePayment', async (req, res) => {
     email: req.body.email,
     planId: parsedPlan.id,
   };
-
-  const subscription = await STRIPE_API.createCustomerAndSubscription(
-    req.body.paymentMethodId,
-    customerInfo,
-  );
-
+  let subscription;
+  try {
+    subscription = await STRIPE_API.createCustomerAndSubscription(
+      req.body.paymentMethodId,
+      customerInfo,
+    );
+  } catch (err) {
+    throw Error(`/handlePayment ${err}`)
+  }
   return res.json({ subscription });
 });
 

@@ -69,7 +69,7 @@ function attachPlansToProducts(plans, products) {
  */
 function getProductsAndPlans() {
   return Promise.all([
-    stripe.products.list({}), // Default returns 10 products, sorted by most recent creation date
+    stripe.products.list({  type:'service' }), // Default returns 10 products, sorted by most recent creation date
     stripe.plans.list({}), // Default returns 10 plans, sorted by most recent creation date
   ]).then(stripeData => {
     var products = formatProducts(stripeData[0].data);
@@ -90,6 +90,7 @@ function getProductsAndPlans() {
  * @return {Object} Your customer's newly created subscription
  */
 async function createCustomerAndSubscription(paymentMethodId, customerInfo) {
+  let subscription;
   /* Create customer and set default payment method */
   const customer = await stripe.customers.create({
     payment_method: paymentMethodId,
@@ -99,22 +100,21 @@ async function createCustomerAndSubscription(paymentMethodId, customerInfo) {
       default_payment_method: paymentMethodId,
     },
   });
-
   /* Create subscription and expand the latest invoice's Payment Intent 
    * We'll check this Payment Intent's status to determine if this payment needs SCA
    */
-  const subscription = await stripe.subscriptions.create({
+   subscription = await stripe.subscriptions.create({
     customer: customer.id,
     items: [{
       plan: customerInfo.planId,
     }],
     // trial_from_plan: true,
     expand: ["latest_invoice.payment_intent"],
+    payment_behavior:'allow_incomplete'
   });
-
+  
   return subscription;
 }
-
 
 module.exports = {
   getProductsAndPlans,

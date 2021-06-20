@@ -107,7 +107,7 @@
 <!-- JAVASCRIPT HERE -->
 <script>
   /* Replace with Publishable Stripe Key */
-  var stripe = Stripe('pk_test_***********************');
+  var stripe = Stripe('pk_test_XXXXXX');
 
   /* INITIALIZE STRIPE ELEMENTS */
 
@@ -183,7 +183,6 @@
     event.preventDefault(); // Prevent the default form submission
     const customerName = document.getElementById('customerName').value;
     const customerEmail = document.getElementById('customerEmail').value;
-
     /* Create your 'card' payment method */
     stripe.createPaymentMethod({
       type: 'card',
@@ -203,7 +202,9 @@
         /* Proceed to next step of creating customer and subscription */
         stripePaymentMethodHandler(result.paymentMethod);
       }
-    });
+    }).catch((err)=>{
+      console.error(err,'createPaymentMethod(): err');
+    })
   });
 
 
@@ -235,11 +236,10 @@
   function manageSubscriptionStatus(subscription) {
     const { latest_invoice } = subscription;
     const { payment_intent } = latest_invoice;
-
     if (payment_intent) {
       /* Do NOT share or embed your client_secret anywhere */
       const { client_secret, status } = payment_intent;
-      if (status === "requires_action" || status === "requires_payment_method") {
+      if (status === "requires_action" || status === "requires_payment_method" || status === "requires_source_action" ) {
         stripe.confirmCardPayment(client_secret)
         .then((result) => {
           if (result.error) {

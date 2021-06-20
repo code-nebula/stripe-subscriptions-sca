@@ -67,7 +67,7 @@ function attachPlansToProducts(plans, products) {
  * @return {Array} An array of Stripe products that have 1+ plans
  * Each Stripe product contains an array of Stripe plans
  */
-async function getProductsAndPlans() {
+function getProductsAndPlans() {
   return Promise.all([
     stripe.products.list({  type:'service' }), // Default returns 10 products, sorted by most recent creation date
     stripe.plans.list({}), // Default returns 10 plans, sorted by most recent creation date
